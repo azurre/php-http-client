@@ -26,7 +26,9 @@ class Http
         $data,
         $raw,
         $response,
+        $rawResponseHeaders,
         $responseHeaders,
+        $cookies,
         $statusCode,
         $error,
         $timeout = 60,
@@ -108,6 +110,14 @@ class Http
             $this->setHeader('Content-Length', strlen($data));
             $contextData['http']['content'] = $data;
         }
+
+        if(!isset($headers['Host'])) {
+            $host = parse_url($url, PHP_URL_HOST);
+            if ($host) {
+                $this->setHeader('Host', $host);
+            }
+        }
+
         $contextData = [
             'http' => [
                 'method'        => $method,
@@ -145,7 +155,18 @@ class Http
      */
     protected function parseHeaders($responseHeaders)
     {
-        $this->responseHeaders = $responseHeaders;
+        $this->rawResponseHeaders = $responseHeaders;
+        $this->cookies = [];
+        foreach ($responseHeaders as $header) {
+            list($key, $value) = explode(':', $header);
+            $value = trim($value);
+            if ($key === 'Set-Cookie') {
+                $this->cookies[] = $value;
+            } else {
+                $this->responseHeaders[$key] = $value;
+            }
+            $this->responseHeaders['Cookies'] = $this->cookies;
+        }
         $this->statusCode = (int)preg_replace('/.*?\s(\d+)\s.*/', "\\1", $responseHeaders[0]);
         return $this;
     }
@@ -182,6 +203,19 @@ class Http
     }
 
     /**
+     * Retrieve processed response
+     *
+     * @return string
+     */
+    public function getResponseProcessed()
+    {
+        if ($this->getResponseHeaders('Content-Encoding') === 'gzip') {
+            return gzdecode($this->getResponse());
+        }
+        return $this->getResponse();
+    }
+
+    /**
      * @return string
      */
     public function getResponse()
@@ -200,10 +234,15 @@ class Http
     /**
      * Retrieve response headers
      *
+     * @param string|null $key
+     *
      * @return array
      */
-    public function getResponseHeaders()
+    public function getResponseHeaders($key = null)
     {
+        if ($key) {
+            return isset($this->responseHeaders[$key]) ? $this->responseHeaders[$key] : null;
+        }
         return $this->responseHeaders;
     }
 
@@ -309,6 +348,6 @@ class Http
      */
     public function __toString()
     {
-        return (string)$this->response;
+        return $this->getResponseProcessed();
     }
 }
