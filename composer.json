@@ -1,0 +1,21 @@
+{
+  "name": "azurre/php-simple-http",
+  "description": "Simple http client",
+  "keywords": ["http"],
+  "authors": [
+    {
+      "name": "Aleksandr Milenin",
+      "email": "admin@azrr.info"
+    }
+  ],
+  "autoload": {
+    "psr-0": {
+      "Azurre\\Component": "src/"
+    }
+  },
+  "license": "ISC",
+  "homepage": "",
+  "support": {
+    "issues": ""
+  }
+}
