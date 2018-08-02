@@ -4,6 +4,7 @@
  * @version 0.1
  * @author  Aleksandr Milenin azrr.mail@gmail.com
  */
+
 namespace Azurre\Component;
 
 /**
@@ -17,7 +18,7 @@ class Http
     const METHOD_HEAD   = 'HEAD';
     const METHOD_DELETE = 'DELETE';
 
-    const STATUS_OK = 200;
+    const STATUS_OK        = 200;
     const STATUS_NOT_FOUND = 404;
 
     protected
@@ -46,6 +47,7 @@ class Http
     {
         $this->url = $url;
         $this->method = static::METHOD_GET;
+
         return $this;
     }
 
@@ -60,7 +62,8 @@ class Http
         $this->url = $url;
         $this->method = static::METHOD_POST;
         $this->data = $data;
-        $this->setHeader('Content-Type','application/x-www-form-urlencoded');
+        $this->setHeader('Content-Type', 'application/x-www-form-urlencoded');
+
         return $this;
     }
 
@@ -75,7 +78,8 @@ class Http
         $this->url = $url;
         $this->method = static::METHOD_PUT;
         $this->data = $data;
-        $this->setHeader('Content-Type','application/x-www-form-urlencoded');
+        $this->setHeader('Content-Type', 'application/x-www-form-urlencoded');
+
         return $this;
     }
 
@@ -88,6 +92,7 @@ class Http
     {
         $this->url = $url;
         $this->method = static::METHOD_DELETE;
+
         return $this;
     }
 
@@ -99,32 +104,29 @@ class Http
      *
      * @return $this
      */
-    public function request($url, $method = self::METHOD_GET, $data = null, $headers = [])
+    public function request($url, $method = self::METHOD_GET, $data = null, array $headers = [])
     {
+        $contextData = ['http' => []];
         $this->response = $this->error = null;
         $method = strtoupper($method);
         if ($data) {
-            if (!$this->raw) {
-                $data = http_build_query($data);
-            }
-            $this->setHeader('Content-Length', strlen($data));
-            $contextData['http']['content'] = $data;
+            $content = $this->raw ? $data : http_build_query($data);
+            $this->setHeader('Content-Length', strlen($content));
+            $contextData['http']['content'] = $content;
         }
 
-        if(!isset($headers['Host'])) {
+        if (!isset($headers['Host'])) {
             $host = parse_url($url, PHP_URL_HOST);
             if ($host) {
                 $this->setHeader('Host', $host);
             }
         }
 
-        $contextData = [
-            'http' => [
-                'method'        => $method,
-                'header'        => $this->makeHeaders(array_merge($this->defaultHeaders, $headers)),
-                'timeout'       => $this->timeout,
-                'ignore_errors' => $this->ignoreErrors
-            ]
+        $contextData['http'] += [
+            'method'        => $method,
+            'header'        => $this->makeHeaders(array_merge($this->defaultHeaders, $headers)),
+            'timeout'       => $this->timeout,
+            'ignore_errors' => $this->ignoreErrors
         ];
         if (!$this->verifySSL) {
             $contextData['ssl'] = [
@@ -133,15 +135,21 @@ class Http
             ];
         }
         try {
+            if (function_exists('\error_clear_last')) {
+                \error_clear_last();
+            }
+            $errorOrigin = \error_get_last();
             $this->response = @file_get_contents($url, false, stream_context_create($contextData));
         } catch (\Exception $e) {
             $this->error = $e->getMessage();
             $this->statusCode = -1;
+
             return $this;
         }
-
-        $error = error_get_last();
-        $this->error = empty($error['message']) ? null : $error['message'];
+        $error = \error_get_last();
+        if (!empty($error['message']) && $errorOrigin && $errorOrigin['message'] !== $error['message']) {
+            $this->error = $error['message'];
+        }
 
         isset($http_response_header) ? $this->parseHeaders($http_response_header) : $this->statusCode = -1;
 
@@ -157,7 +165,8 @@ class Http
     {
         $this->rawResponseHeaders = $responseHeaders;
         $this->cookies = [];
-        foreach ($responseHeaders as $header) {
+        $responseHeaders = array_slice($responseHeaders,1);
+        foreach ($responseHeaders as $i => $header) {
             list($key, $value) = explode(':', $header);
             $value = trim($value);
             if ($key === 'Set-Cookie') {
@@ -167,7 +176,12 @@ class Http
             }
             $this->responseHeaders['Cookies'] = $this->cookies;
         }
-        $this->statusCode = (int)preg_replace('/.*?\s(\d+)\s.*/', "\\1", $responseHeaders[0]);
+        $this->statusCode = (int)preg_replace(
+            '/.*?\s(\d+)\s.*/',
+            "\\1",
+            reset($this->responseHeaders)
+        );
+
         return $this;
     }
 
@@ -199,6 +213,7 @@ class Http
         if (is_callable($callback)) {
             $callback($this);
         }
+
         return $this;
     }
 
@@ -212,6 +227,7 @@ class Http
         if ($this->getResponseHeaders('Content-Encoding') === 'gzip') {
             return gzdecode($this->getResponse());
         }
+
         return $this->getResponse();
     }
 
@@ -243,6 +259,7 @@ class Http
         if ($key) {
             return isset($this->responseHeaders[$key]) ? $this->responseHeaders[$key] : null;
         }
+
         return $this->responseHeaders;
     }
 
@@ -292,6 +309,7 @@ class Http
     public function setTimeout($timeout)
     {
         $this->timeout = $timeout;
+
         return $this;
     }
 
@@ -306,6 +324,7 @@ class Http
     public function setHeader($key, $value)
     {
         $this->headers[$key] = $value;
+
         return $this;
     }
 
@@ -319,6 +338,7 @@ class Http
     public function setHeaders($headers)
     {
         $this->headers = $headers;
+
         return $this;
     }
 
@@ -332,6 +352,7 @@ class Http
     public function setRaw($enable = true)
     {
         $this->raw = (bool)$enable;
+
         return $this;
     }
 
