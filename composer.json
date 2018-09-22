@@ -1,6 +1,7 @@
 {
   "name": "azurre/php-simple-http",
   "description": "Simple http client",
+  "version": "1.0.2",
   "keywords": ["http"],
   "authors": [
     {

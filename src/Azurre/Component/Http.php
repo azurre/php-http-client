@@ -21,6 +21,27 @@ class Http
     const STATUS_OK        = 200;
     const STATUS_NOT_FOUND = 404;
 
+    protected $followLocation = true;
+
+    /**
+     * @return bool
+     */
+    public function isFollowLocation()
+    {
+        return $this->followLocation;
+    }
+
+    /**
+     * @param bool $followLocation
+     * @return Http
+     */
+    public function setFollowLocation($followLocation)
+    {
+        $this->followLocation = (bool)$followLocation;
+
+        return $this;
+    }
+
     protected
         $method,
         $url,
@@ -106,7 +127,7 @@ class Http
      */
     public function request($url, $method = self::METHOD_GET, $data = null, array $headers = [])
     {
-        $contextData = ['http' => []];
+        $contextData = ['http' => ['follow_location' => $this->followLocation]];
         $this->response = $this->error = null;
         $method = strtoupper($method);
         if ($data) {
@@ -163,11 +184,14 @@ class Http
      */
     protected function parseHeaders($responseHeaders)
     {
+        // @todo Handle several headers (redirects)
         $this->rawResponseHeaders = $responseHeaders;
         $this->cookies = [];
-        $responseHeaders = array_slice($responseHeaders,1);
         foreach ($responseHeaders as $i => $header) {
-            list($key, $value) = explode(':', $header);
+            $headerChunks = preg_split('/:\s/', $header, 2);
+            $chunksCount = count($headerChunks);
+            if ($chunksCount === 2) {
+                list($key, $value) = $headerChunks;
             $value = trim($value);
             if ($key === 'Set-Cookie') {
                 $this->cookies[] = $value;
@@ -175,12 +199,14 @@ class Http
                 $this->responseHeaders[$key] = $value;
             }
             $this->responseHeaders['Cookies'] = $this->cookies;
-        }
+            } elseif ($chunksCount === 1) {
         $this->statusCode = (int)preg_replace(
             '/.*?\s(\d+)\s.*/',
             "\\1",
-            reset($this->responseHeaders)
+                    reset($headerChunks)
         );
+            }
+        }
 
         return $this;
     }
