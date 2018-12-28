@@ -4,7 +4,7 @@ Simple PHP 5.4+ HTTP client that makes it easy to send HTTP requests
 ## Installation
 
 ```bash
-composer require azurre/php-http-client
+composer require azurre/php-http-client:"^1.0"
 ```
 
 ## Usage 
