@@ -1,7 +1,7 @@
 {
     "name": "azurre/php-http-client",
     "description": "Simple http client",
-    "version": "1.0.3",
+    "version": "1.0.4",
     "keywords": ["http","client","http client","json","api"],
     "authors": [
         {

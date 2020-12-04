@@ -64,10 +64,12 @@ class Client
 
     /**
      * @param string $url
+     * @param array $data
      * @return $this
      */
-    public function get($url)
+    public function get($url, array $data = [])
     {
+        $url .= $data ? ((parse_url($url, PHP_URL_QUERY) ? '&' : '?') . http_build_query($data)) : '';
         $this->url = $url;
         $this->method = static::METHOD_GET;
         return $this;
