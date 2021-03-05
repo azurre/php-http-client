@@ -72,6 +72,7 @@ class Client
         $url .= $data ? ((parse_url($url, PHP_URL_QUERY) ? '&' : '?') . http_build_query($data)) : '';
         $this->url = $url;
         $this->method = static::METHOD_GET;
+        $this->data = null;
         return $this;
     }
 
@@ -130,7 +131,7 @@ class Client
     /**
      * @param string $url
      * @param string $method
-     * @param array $data
+     * @param array|null $data
      * @param array $headers
      * @return $this
      * @throws \Exception
@@ -147,13 +148,13 @@ class Client
             } else {
                 $content = $data;
             }
-            $this->setHeader('Content-Length', strlen($content));
+            $headers['Content-Length'] = strlen($content);
             $contextData['http']['content'] = $content;
         }
         if (!isset($headers['Host'])) {
             $host = parse_url($url, PHP_URL_HOST);
             if ($host) {
-                $this->setHeader('Host', $host);
+                $headers['Host'] = $host;
             }
         }
         $contextData['http'] += [
