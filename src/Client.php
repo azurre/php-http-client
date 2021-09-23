@@ -86,7 +86,9 @@ class Client
         $this->url = $url;
         $this->method = static::METHOD_POST;
         $this->data = $data;
-        $this->setHeader('Content-Type', 'application/x-www-form-urlencoded');
+        if (!$this->isJson) {
+            $this->setHeader('Content-Type', 'application/x-www-form-urlencoded');
+        }
         return $this;
     }
 
@@ -100,7 +102,9 @@ class Client
         $this->url = $url;
         $this->method = static::METHOD_PUT;
         $this->data = $data;
-        $this->setHeader('Content-Type', 'application/x-www-form-urlencoded');
+        if (!$this->isJson) {
+            $this->setHeader('Content-Type', 'application/x-www-form-urlencoded');
+        }
         return $this;
     }
 
