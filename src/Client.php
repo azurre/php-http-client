@@ -1,7 +1,8 @@
 <?php
 /**
- * @date    10.03.2015
- * @author  Aleksandr Milenin azrr.mail@gmail.com
+ * @author Alex Milenin
+ * @email  admin@azrr.info
+ * @copyright Copyright (c)Alex Milenin (https://azrr.info/)
  */
 
 namespace Azurre\Component\Http;
@@ -359,10 +360,19 @@ class Client
     }
 
     /**
+     * @param string $key
+     * @return string
+     */
+    public function getHeader($key)
+    {
+        return isset($this->headers[$key]) ? $this->headers[$key] : null;
+    }
+
+    /**
      * Set header key
      *
-     * @param $key
-     * @param $value
+     * @param string $key
+     * @param string $value
      * @return $this
      */
     public function setHeader($key, $value)
@@ -440,6 +450,62 @@ class Client
     public function setProxy($proxy)
     {
         $this->proxy = (string)$proxy;
+        return $this;
+    }
+
+    /**
+     * @return string|null
+     */
+    public function getUrl()
+    {
+        return $this->url;
+    }
+
+    /**
+     * @param string $url
+     * @return $this
+     */
+    public function setUrl($url)
+    {
+        $this->url = $url;
+        return $this;
+    }
+
+    /**
+     * @return string|null
+     */
+    public function getMethod()
+    {
+        return $this->method;
+    }
+
+    /**
+     * @param string $method
+     *
+     * @return $this
+     */
+    public function setMethod($method)
+    {
+        $this->method = $method;
+        return $this;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getData()
+    {
+        return $this->data;
+    }
+
+    /**
+     * @param mixed $data
+     *
+     * @return $this
+     */
+    public function setData($data)
+    {
+        $this->data = $data;
         return $this;
     }
 
