@@ -7,37 +7,31 @@
 
 namespace Azurre\Component\Http\Tests;
 
-use \Azurre\Component\Http\Client;
+use Exception;
+use Azurre\Component\Http\Client;
+use PHPUnit\Framework\Attributes\Test;
+use PHPUnit\Framework\TestCase;
 
-/**
- * Class ClientTest
- */
-class ClientTest extends \PHPUnit\Framework\TestCase
+class ClientTest extends TestCase
 {
-    /**
-     * @test
-     */
-    public function statusCodeTest()
+    #[Test] public function statusCodeTest()
     {
         $request = Client::create();
         try {
-            $request->get(BASE_URL)->execute()->getResponse();
-        } catch (\Exception $e) {
+            $request->get(BASE_URL)->execute();
+        } catch (Exception $e) {
             $this->fail($e->getMessage());
         }
         $this->assertEquals(200, $request->getStatusCode());
     }
 
-    /**
-     * @test
-     */
-    public function dataTest()
+    #[Test] public function dataTest()
     {
         $request = Client::create();
         $data = ['test' => ['data' => 123, 'message' => 'OK']];
         try {
             $request->post(BASE_URL, $data)->execute()->getResponse();
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             $this->fail($e->getMessage());
         }
         $response = json_decode($request->getResponse(), true);
@@ -45,46 +39,37 @@ class ClientTest extends \PHPUnit\Framework\TestCase
         $this->assertEquals('123', $response['POST']['test']['data']);
     }
 
-    /**
-     * @test
-     */
-    public function apiTest()
+    #[Test] public function apiTest()
     {
         $request = Client::create();
         $data = ['test' => ['data' => 123, 'message' => 'OK']];
         try {
             $request->post(BASE_URL, $data)->setIsJson()->execute()->getResponse();
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             $this->fail($e->getMessage());
         }
         $response = json_decode($request->getResponse(), true);
         $this->assertEquals(json_encode($data), $response['INPUT']);
     }
 
-    /**
-     * @test
-     */
-    public function headersTest()
+    #[Test] public function headersTest()
     {
         $request = Client::create();
         try {
-            $request->get(BASE_URL)->setHeader('TEST', 'OK')->execute()->getResponse();
-        } catch (\Exception $e) {
+            $request->get(BASE_URL)->addHeader('TEST', 'OK')->execute()->getResponse();
+        } catch (Exception $e) {
             $this->fail($e->getMessage());
         }
         $response = json_decode($request->getResponse(), true);
         $this->assertEquals('OK', $response['SERVER']['HTTP_TEST']);
     }
 
-    /**
-     * @test
-     */
-    public function cookiesTest()
+    #[Test] public function cookiesTest()
     {
         $request = Client::create();
         try {
-            $request->get(BASE_URL)->setCookie(['test' => 'OK', 'test1' => 1])->execute()->getResponse();
-        } catch (\Exception $e) {
+            $request->get(BASE_URL)->setCookies(['test' => 'OK', 'test1' => 1])->execute()->getResponse();
+        } catch (Exception $e) {
             $this->fail($e->getMessage());
         }
         $response = json_decode($request->getResponse(), true);

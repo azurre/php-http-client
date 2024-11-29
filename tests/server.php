@@ -1,4 +1,8 @@
 <?php
+if ($_SERVER['SCRIPT_NAME'] === '/phpinfo'){
+    return phpinfo();
+}
+
 $output = [
     'SERVER' => $_SERVER,
     'GET' => $_GET,
