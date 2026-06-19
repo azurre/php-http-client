@@ -124,7 +124,6 @@ class Client
         array|string|null $data = null,
         array $headers = []
     ): static {
-        //$http_response_header = null;
         $this->reset();
         $streamContext = $this->makeStreamContext($url, $method, $data, $headers);
         $this->response = @file_get_contents($url, false, $streamContext);
@@ -135,7 +134,10 @@ class Client
         if ($error) {
             throw new Exception($error);
         }
-        $this->parseHeaders($http_response_header);
+        $responseHeaders = function_exists('http_get_last_response_headers')
+            ? http_get_last_response_headers()
+            : $http_response_header;
+        $this->parseHeaders($responseHeaders);
         return $this;
     }
 
