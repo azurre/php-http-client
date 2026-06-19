@@ -121,7 +121,7 @@ class Client
     public function request(
         string $url,
         string $method = self::METHOD_GET,
-        array|string $data = null,
+        array|string|null $data = null,
         array $headers = []
     ): static {
         //$http_response_header = null;
@@ -142,7 +142,7 @@ class Client
     protected function makeStreamContext(
         string $url,
         string $method,
-        array|string $data = null,
+        array|string|null $data = null,
         array $headers = []
     ) {
         $contextData = ['http' => ['follow_location' => $this->followLocation]];
@@ -235,7 +235,7 @@ class Client
     /**
      * @throws Exception
      */
-    public function download(string $url, string $destinationPath, ?callable $progressCallback = null)
+    public function download(string $url, string $destinationPath, ?callable $progressCallback = null): static
     {
         $streamContext = $this->makeStreamContext($url, $this->method, $this->data, $this->headers);
         $readStream = @fopen($url, 'rb', false, $streamContext);
@@ -301,7 +301,7 @@ class Client
     /**
      * @throws Exception
      */
-    public function execute(callable $callback = null): static
+    public function execute(?callable $callback = null): static
     {
         $this->request($this->url, $this->method, $this->data, $this->headers);
         if (is_callable($callback)) {
@@ -333,7 +333,7 @@ class Client
         return $this->headers;
     }
 
-    public function getResponseHeaders(string $key = null): ?array
+    public function getResponseHeaders(?string $key = null): ?array
     {
         if ($key) {
             return $this->responseHeaders[$key] ?? null;
@@ -412,12 +412,12 @@ class Client
     }
 
     /** @deprecated Use setCookies instead */
-    public function setCookie(array|string $name, string $value = null): static
+    public function setCookie(array|string $name, ?string $value = null): static
     {
         return $this->setCookies($name, $value);
     }
 
-    public function setCookies(array|string $name, string $value = null): static
+    public function setCookies(array|string $name, ?string $value = null): static
     {
         if (is_array($name)) {
             $this->headers['Cookie'] = $name;
