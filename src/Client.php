@@ -136,7 +136,7 @@ class Client
         }
         $responseHeaders = function_exists('http_get_last_response_headers')
             ? http_get_last_response_headers()
-            : $http_response_header;
+            : ($http_response_header ?? null);
         $this->parseHeaders($responseHeaders);
         return $this;
     }
