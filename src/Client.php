@@ -335,7 +335,7 @@ class Client
         return $this->headers;
     }
 
-    public function getResponseHeaders(?string $key = null): ?array
+    public function getResponseHeaders(?string $key = null): array|string|null
     {
         if ($key) {
             return $this->responseHeaders[$key] ?? null;
